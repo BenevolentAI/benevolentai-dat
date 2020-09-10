@@ -1,7 +1,6 @@
 import os
 import logging 
 
-import seaborn as sns
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -27,10 +26,10 @@ class GraphUtility:
             'ethnicity': 'Ethnicity',
             'race': 'Race',
             'sex': 'Sex',
-            'ses': 'Socioeconomic Status',
-            'educ': 'Education'
         }
-
+        # Add missing colnames
+        missing_cols = list(set(self.df.columns.values)-set(colname_dict.keys()))
+        colname_dict.update({colname: colname for colname in  missing_cols})
         # Plot individual feature graphs
         for column_name in self.df.columns.values:
             self.generate_bar_graph(column_name, 'Number of patients', colname_dict[column_name])
@@ -59,7 +58,7 @@ class GraphUtility:
         sns.set(style='whitegrid', palette='colorblind', font='DejaVu Sans', font_scale=1,
                 color_codes=True)
 
-        g = sns.catplot(y=column_name, kind="count", data=self.df.sort_values(column_name, na_position='last',ascending=False), color="b")
+        g = sns.catplot(y=column_name, kind="count", data=self.df.sort_values(column_name, na_position='last', ascending=False), color="b")
         [plt.setp(ax.get_xticklabels(), rotation=-45) for ax in g.axes.flat]
         if x_label:
             plt.xlabel(x_label)

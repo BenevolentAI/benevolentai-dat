@@ -23,7 +23,7 @@ class AssessDiversity:
     age, sex, ethnicity, race, ses, is_deceased.
     """
     def __init__(self, preferred_ethnicity_transformation, preferred_race_transformation,
-                 preferred_sex_transformation):
+                 preferred_sex_transformation, preferred_ses_transformation):
 
         # By default, this class assumes it is processing data coming from an NHS hospital.  It could be adapted
         # to support data sets from other countries (eg: USA) by developing other methods that recognised different
@@ -31,6 +31,7 @@ class AssessDiversity:
         self.transform_ethnicity_routine = preferred_ethnicity_transformation
         self.transform_race_routine = preferred_race_transformation
         self.transform_sex_routine = preferred_sex_transformation
+        self.transform_ses_routine = preferred_ses_transformation
 
         # The class will create results which contain age bands. These can help support more useful demographic
         # reporting and can also help minimise re-identifiability of demographic data.
@@ -38,7 +39,7 @@ class AssessDiversity:
         self.age_upper_limit = 90
 
     def transform(self, original_df, years_per_age_band, age_column_name, sex_column_name, ethnicity_column_name,
-                  race_column_name, ses_column_name,education_column_name, is_deceased_column_name):
+                  race_column_name, ses_column_name, is_deceased_column_name):
         """
         :param original_df:
         :param years_per_age_band: number of years interval covered in an age band eg 5 would produce age bands like
@@ -59,25 +60,29 @@ class AssessDiversity:
             df = self.transform_ethnicity_routine(df, ethnicity_column_name)
         if self.transform_race_routine:
             df = self.transform_race_routine(df, race_column_name)
+        if self.transform_ses_routine:
+            df = self.transform_ses_routine(df, ses_column_name)
+
 
         # Masks the first list with the second list.
-        col_name_dict = {
+        # keeping ses_column_name as socio-economic status can be measured in different ways
+
+        colname_dict = {
             'age_band': age_column_name,
             'sex': sex_column_name,
             'ethnicity': ethnicity_column_name,
             'race': race_column_name,
             'is_deceased': is_deceased_column_name,
-            'educ': education_column_name,
-            'ses': ses_column_name
+            ses_column_name: ses_column_name
         }
-        all_columns_list = [k for k, v in col_name_dict.items() if v in df.columns.values]
+        all_columns_list = [k for k, v in colname_dict.items() if v in df.columns.values]
         df = df[all_columns_list]
         df = df.sort_values(by=all_columns_list[0])
         return df
 
 
     def create_diversity_analysis_report(self, original_df, years_per_band, age_column_name, sex_column_name,
-                                         ethnicity_column_name, race_column_name, ses_column_name, education_column_name,
+                                         ethnicity_column_name, race_column_name, ses_column_name,
                                          is_deceased_column_name, output_directory_path):
         """
         The main routine to call from your own analysis for diversity.
@@ -94,7 +99,7 @@ class AssessDiversity:
         """
         df = original_df.copy()
         cleaned_results_df = self.transform(df, years_per_band, age_column_name, sex_column_name,
-                                            ethnicity_column_name, race_column_name, ses_column_name,education_column_name,
+                                            ethnicity_column_name, race_column_name, ses_column_name,
                                             is_deceased_column_name)
 
         if not os.path.exists(output_directory_path):
@@ -261,4 +266,23 @@ def transform_nhs_race(df, race_column_name):
 
     df[race_column_name].fillna('Unknown', inplace=True)
     df[race_column_name] = df[race_column_name].apply(lambda x: NHS_RACE_CODE_DICT[x])
+    return df
+
+def transform_ses_order(df, ses_column_name):
+    """
+    Orders the ses_column_name leves by ses_level if given in data frame
+    Args:
+        df: demographic data
+        ses_column_name: the column name in the demographic data that describes socio-economic status
+    Returns:
+    """
+    if 'ses_level' not in df.columns.values:
+        return df
+
+    # ordering the levels by ses_level:
+    level_order = sorted(set(zip(df.ses_level, df[ses_column_name])))
+    level_order = [lev[1] for lev in level_order]
+    df[ses_column_name] = df[ses_column_name].astype('category')
+    df[ses_column_name].cat.reorder_categories(level_order, inplace=True)
+
     return df

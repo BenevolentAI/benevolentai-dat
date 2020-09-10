@@ -18,7 +18,10 @@ def rename_by_code(df):
     df.loc[(df.RACE == 7),'RACE'] = 'Other race, nec'
     df.loc[(df.RACE == 8),'RACE'] = 'Two major races'
     df.loc[(df.RACE == 9),'RACE'] = 'Three or more major races'
-    
+
+    # Keeping the level for ordering in plots
+    df['SES_LEVEL'] = df.EDUC
+
     # Education
     df.loc[(df.EDUC == 0),'EDUC'] = 'N/A or no schooling'
     df.loc[(df.EDUC == 1),'EDUC'] = 'Nursery school to grade 4'
@@ -32,6 +35,7 @@ def rename_by_code(df):
     df.loc[(df.EDUC == 9),'EDUC'] = '3 years of college'
     df.loc[(df.EDUC == 10),'EDUC'] = '4 years of college'
     df.loc[(df.EDUC == 11),'EDUC'] = '5+ years of college'
+
     return df
 
 def clean_ipums(filename, outputfile, save_to_file=True):

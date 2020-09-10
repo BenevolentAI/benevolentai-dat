@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import pandas as pd
-from diversity_analysis_tool.diversity import AssessDiversity
+from diversity_analysis_tool.diversity import AssessDiversity, transform_ses_order
 
 logger = logging.getLogger("diversity_analysis_tool.main")
 logger.setLevel(logging.INFO)
@@ -27,8 +27,11 @@ def main():
 
 
     data_df = pd.read_csv(args.input_data)
+
     logger.debug("Converted data to pandas data frame. Creating AssessDiversity instance")
-    assess_diversity = AssessDiversity(None, None, None)
+    # if there is a column describing the ses levels in the data frame, order the levels accordingly
+    assess_diversity = AssessDiversity(None, None, None, transform_ses_order)
+
     assess_diversity.create_diversity_analysis_report(data_df, 5, 'age', 'sex', 'ethnicity',
-                                                      'race', None, 'educ', 'is_deceased', args.output_dir)
+                                                      'race', 'educ', 'is_deceased', args.output_dir)
     logger.info("Assessment complete. See {} for results".format(args.output_dir))
