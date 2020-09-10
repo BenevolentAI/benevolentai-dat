@@ -40,7 +40,6 @@ The package will be hot reloaded as you make changes so you do not need to reins
 <br>
 
 ## Documentation of Demographic Variables
-[[_TOC_]]
 
 ### Age
 
