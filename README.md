@@ -7,7 +7,7 @@ Characterizing diversity in biodata and producing visualizations
 
 #### As a command line tool.
 
-pip install the package. `pip install diversity-analysis-tool`. This is will expose all the command line entry points available.
+Clone the repository and then pip install the package. `pip install <path-to-package>`. This is will expose all the command line entry points available.
 
 E.g. to assess the diversity of a your data, use the `assess_diversity` command.
 ```bash
