@@ -1,10 +1,7 @@
-import itertools
 import os
 import logging
 
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 from diversity_analysis_tool.graph_construction import GraphUtility

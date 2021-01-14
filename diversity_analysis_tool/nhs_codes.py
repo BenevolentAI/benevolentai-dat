@@ -21,7 +21,6 @@ NHS_ETHNICITY_CODE_DICT = dict(
     Unknown='Unknown',
 )
 
-
 # These are not strictly 'race' categories, but the generic headings under which NHS ethnicity codes are
 # organised. As you can see, these categories aren't much use from a biological perspective.
 NHS_RACE_CODE_DICT = dict(
