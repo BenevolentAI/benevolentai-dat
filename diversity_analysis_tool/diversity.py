@@ -1,10 +1,7 @@
-import itertools
 import os
-import logging 
+import logging
 
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 from diversity_analysis_tool.graph_construction import GraphUtility
@@ -12,6 +9,7 @@ from diversity_analysis_tool.nhs_codes import NHS_ETHNICITY_CODE_DICT, NHS_RACE_
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class AssessDiversity:
     """
@@ -22,6 +20,7 @@ class AssessDiversity:
     It assumes the input data frame has the following optional columns:
     age, sex, ethnicity, race, ses, is_deceased.
     """
+
     def __init__(self, preferred_ethnicity_transformation, preferred_race_transformation,
                  preferred_sex_transformation, preferred_ses_transformation):
 
@@ -41,16 +40,17 @@ class AssessDiversity:
     def transform(self, original_df, years_per_age_band, age_column_name, sex_column_name, ethnicity_column_name,
                   race_column_name, ses_column_name, is_deceased_column_name):
         """
-        :param original_df:
-        :param years_per_age_band: number of years interval covered in an age band eg 5 would produce age bands like
-        (0,5], (5, 10]...
-        :param age_column_name: column name in the input demographic data frame that describes age. (eg: 'age')
-        :param sex_column_name:
-        :param ethnicity_column_name:
-        :param race_column_name:
-        :param ses_column_name:
-        :param is_deceased_column_name:
-        :return:
+        Transform demographic dataframe
+
+        Args:
+            original_df: demographic data frame
+            years_per_age_band: number of years interval covered in an age band eg 5 would produce age bands like (0,5], (5, 10]...
+            age_column_name: column name in the input demographic data frame that describes age. (eg: 'age')
+            sex_column_name: column name in the input demographic data frame that describes sex. (eg: 'sex')
+            ethnicity_column_name: column name in the input demographic data frame that describes ethnicity. (eg: 'ethnicity')
+            race_column_name: column name in the input demographic data frame that describes race. (eg: 'race')
+            ses_column_name: column name in the input demographic data frame that describes ses. (eg: 'ses')
+            is_deceased_column_name: column name in the input demographic data frame that describes is deceased. (eg: 'is_deceased')
         """
         df = original_df.copy()
         df = create_age_bands(df, age_column_name, self.age_lower_limit, self.age_upper_limit, years_per_age_band)
@@ -62,7 +62,6 @@ class AssessDiversity:
             df = self.transform_race_routine(df, race_column_name)
         if self.transform_ses_routine:
             df = self.transform_ses_routine(df, ses_column_name)
-
 
         # Masks the first list with the second list.
         # keeping ses_column_name as socio-economic status can be measured in different ways
@@ -80,14 +79,13 @@ class AssessDiversity:
         df = df.sort_values(by=all_columns_list[0])
         return df
 
-
     def create_diversity_analysis_report(self, original_df, years_per_band, age_column_name, sex_column_name,
                                          ethnicity_column_name, race_column_name, ses_column_name,
                                          is_deceased_column_name, output_directory_path):
         """
         The main routine to call from your own analysis for diversity.
         Args:
-            df:
+            df: demographic data frame
             years_per_band: number of years per age band
             age_column_name: column name that describes age
             sex_column_name: column name that describes sex
@@ -119,8 +117,8 @@ class AssessDiversity:
         if 'is_deceased' in cleaned_results_df:
             cleaned_results_df['is_deceased'] = cleaned_results_df['is_deceased'].astype(str)
             cleaned_results_df['is_deceased'] = cleaned_results_df['is_deceased'].replace(
-                {'True': 'Yes','False': 'No'}, regex=False)
-                
+                {'True': 'Yes', 'False': 'No'}, regex=False)
+
         grapher = GraphUtility(cleaned_results_df, output_directory_path)
         grapher.build_graph()
 
@@ -137,7 +135,7 @@ def create_age_bands(original_df, age_field_name, start_age=0, end_age=90, years
 
     Generally a maximum category like '90plus' is used to reduce the identifiability of very old people.
     Args:
-        original_df:
+        original_df: original demographic data frame
         age_field_name: tha name of the age field in the input data (eg: 'age')
         start_age: minimum age in the age bands, almost always going to be zero
         end_age: the maximum upper limit for an age
@@ -152,7 +150,7 @@ def create_age_bands(original_df, age_field_name, start_age=0, end_age=90, years
     bin_buckets.append(999)
     lbs = ['(%d, %d]' % (bin_buckets[i], bin_buckets[i + 1]) for i in range(len(bin_buckets) - 1)]
 
-    df[banded_field_name] = pd.cut(x=df[age_field_name], bins=bin_buckets,labels=lbs,include_lowest=True).astype(str)
+    df[banded_field_name] = pd.cut(x=df[age_field_name], bins=bin_buckets, labels=lbs, include_lowest=True).astype(str)
     df[banded_field_name] = df[banded_field_name].str.strip()
 
     current_last_band_name = f"({end_age}, 999]"
@@ -163,8 +161,8 @@ def create_age_bands(original_df, age_field_name, start_age=0, end_age=90, years
     )
 
     df[banded_field_name] = df[banded_field_name].astype(str)
-    df[banded_field_name] = df[banded_field_name].apply(lambda x: str(x[x.find("(")+1:x.find("]")])) 
-    df[banded_field_name] = df[banded_field_name].apply(lambda x: x.replace(',', ' -')) 
+    df[banded_field_name] = df[banded_field_name].apply(lambda x: str(x[x.find("(") + 1:x.find("]")]))
+    df[banded_field_name] = df[banded_field_name].apply(lambda x: x.replace(',', ' -'))
 
     return df
 
@@ -179,7 +177,7 @@ def transform_nhs_sex(original_df, sex_column_name):
     The definition is here:
     https://www.datadictionary.nhs.uk/data_dictionary/attributes/s/ses/sex_of_patients_de.asp?shownav=1
     Args:
-        original_df: the input demographic data
+        original_df:  original demographic data frame
         sex_column_name: the name of the column in the input data describing sex (eg: 'sex')
     Returns: a data frame where the sex column has words instead of numeric codes
     """
@@ -205,14 +203,14 @@ def transform_nhs_sex(original_df, sex_column_name):
 
 def transform_desktop_application_database_sex(original_df, sex_column_name):
     """
-    This is an example is based on a hospital database application that has its own bespoke coding
+    This is an example based on a hospital database application that has its own bespoke coding
     for sex. Think about how you would handle empty values and make sense of whether 'Not specified'
     is the equivalent to 'Unknown'. Also, what value should be assigned if the code is some form of
     empty (eg: None)?
     Args:
-        original_df:
-        sex_column_name:
-    Returns:
+        original_df: original demographic data frame
+        sex_column_name: column name that describes age
+    Returns: Transformed demographic data frame with replaced sex column
     """
     if not sex_column_name in original_df:
         logger.info("No sex field is present")
@@ -230,6 +228,7 @@ def transform_desktop_application_database_sex(original_df, sex_column_name):
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)
     return df
 
+
 # ================================
 # Ethnicity Transformation Methods
 # ================================
@@ -238,15 +237,16 @@ def transform_nhs_ethnicity(df, ethnicity_column_name):
     """
     Substitutes NHS ethnicity codes with full word form (eg: 'R' maps to 'Chinese'
     Args:
-        df:
+        df: demographic data frame
         ethnicity_column_name: the name of the column in the input data that describes ethnicity
-    Returns:
+    Returns: Dataframe with updated ethnicity column
 
     """
     df1 = df[ethnicity_column_name].replace(np.nan, '', regex=True)
     df1[ethnicity_column_name].fillna('Unknown', inplace=True)
     df1[ethnicity_column_name] = df1[ethnicity_column_name].apply(lambda x: NHS_ETHNICITY_CODE_DICT[x])
     return df1
+
 
 # ===========================
 # Race Transformation Methods
@@ -258,7 +258,7 @@ def transform_nhs_race(df, race_column_name):
     Args:
         df: demographic data
         race_column_name: the column name in the demographic data that describes race
-    Returns:
+    Returns: Dataframe with updated race column
     """
     if not race_column_name:
         print("There is no race column")
@@ -268,13 +268,14 @@ def transform_nhs_race(df, race_column_name):
     df[race_column_name] = df[race_column_name].apply(lambda x: NHS_RACE_CODE_DICT[x])
     return df
 
+
 def transform_ses_order(df, ses_column_name):
     """
-    Orders the ses_column_name leves by ses_level if given in data frame
+    Orders the ses_column_name level by ses_level if given in data frame
     Args:
         df: demographic data
         ses_column_name: the column name in the demographic data that describes socio-economic status
-    Returns:
+    Returns: Dataframe sorted by ses level.
     """
     if 'ses_level' not in df.columns.values:
         return df

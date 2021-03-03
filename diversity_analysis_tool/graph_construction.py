@@ -1,13 +1,13 @@
 import os
-import logging 
+import logging
 
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
 
 class GraphUtility:
     # =============
@@ -28,26 +28,30 @@ class GraphUtility:
             'sex': 'Sex',
         }
         # Add missing colnames
-        missing_cols = list(set(self.df.columns.values)-set(colname_dict.keys()))
-        colname_dict.update({colname: colname for colname in  missing_cols})
+        missing_cols = list(set(self.df.columns.values) - set(colname_dict.keys()))
+        colname_dict.update({colname: colname for colname in missing_cols})
         # Plot individual feature graphs
         for column_name in self.df.columns.values:
             self.generate_bar_graph(column_name, 'Number of patients', colname_dict[column_name])
 
         # Two variable graphs
         if set(['age_band', 'ethnicity']).issubset(self.df.columns.values):
-            self.generate_stacked_bar_graph('age_band', 'ethnicity', 'Number of participants', colname_dict['age_band'], colname_dict['ethnicity'])
+            self.generate_stacked_bar_graph('age_band', 'ethnicity', 'Number of participants', colname_dict['age_band'],
+                                            colname_dict['ethnicity'])
         if set(['age_band', 'race']).issubset(self.df.columns.values):
-            self.generate_stacked_bar_graph('age_band', 'race',  'Number of participants', colname_dict['age_band'], colname_dict['race'])
+            self.generate_stacked_bar_graph('age_band', 'race', 'Number of participants', colname_dict['age_band'],
+                                            colname_dict['race'])
         if set(['race', 'sex']).issubset(self.df.columns.values):
-            self.generate_stacked_bar_graph('race', 'sex', 'Number of participants', colname_dict['race'], colname_dict['sex'])
+            self.generate_stacked_bar_graph('race', 'sex', 'Number of participants', colname_dict['race'],
+                                            colname_dict['sex'])
         if set(['ethnicity', 'sex']).issubset(self.df.columns.values):
-            self.generate_stacked_bar_graph('ethnicity', 'sex', 'Number of participants', colname_dict['ethnicity'], colname_dict['sex'])
+            self.generate_stacked_bar_graph('ethnicity', 'sex', 'Number of participants', colname_dict['ethnicity'],
+                                            colname_dict['sex'])
         if set(['age_band', 'sex']).issubset(self.df.columns.values):
-            self.generate_stacked_bar_graph('age_band', 'sex', 'Number of participants', colname_dict['age_band'], colname_dict['sex'])
+            self.generate_stacked_bar_graph('age_band', 'sex', 'Number of participants', colname_dict['age_band'],
+                                            colname_dict['sex'])
 
-
-    def generate_bar_graph(self, column_name, x_label = None, y_label= None):
+    def generate_bar_graph(self, column_name, x_label=None, y_label=None):
         """
         The graph functions can be called on a df and returns a visualization bar chart for one variable
          Args:
@@ -58,7 +62,8 @@ class GraphUtility:
         sns.set(style='whitegrid', palette='colorblind', font='DejaVu Sans', font_scale=1,
                 color_codes=True)
 
-        g = sns.catplot(y=column_name, kind="count", data=self.df.sort_values(column_name, na_position='last', ascending=False), color="b")
+        g = sns.catplot(y=column_name, kind="count",
+                        data=self.df.sort_values(column_name, na_position='last', ascending=False), color="b")
         [plt.setp(ax.get_xticklabels(), rotation=-45) for ax in g.axes.flat]
         if x_label:
             plt.xlabel(x_label)
@@ -66,11 +71,11 @@ class GraphUtility:
             plt.ylabel(y_label)
 
         file_path = os.path.join(self.output_directory_path, f"{column_name}_bar_chart")
-        g.savefig(file_path,bbox_inches='tight')
+        g.savefig(file_path, bbox_inches='tight')
         logger.info(f"successfully saved {column_name} bar graph")
 
-
-    def generate_stacked_bar_graph(self, major_category_column_name, minor_category_column_name, x_label = None, y_label= None, legend_title=None):
+    def generate_stacked_bar_graph(self, major_category_column_name, minor_category_column_name, x_label=None,
+                                   y_label=None, legend_title=None):
         """
         generates a stacked bar graph. Each graph will be labelled by a value in the
         major_category_column_name. Withiin each bar, the height will be divided based on counts of
@@ -104,7 +109,6 @@ class GraphUtility:
         file_path = os.path.join(self.output_directory_path, filename)
         plt.savefig(file_path, bbox_inches='tight')
 
-
         # plot only major
         filename = f"{major_category_column_name}_stacked_bar_chart"
         # removing index name so it doesn't appear as label 'all'
@@ -118,11 +122,10 @@ class GraphUtility:
         plt.savefig(file_path, bbox_inches='tight')
 
         logger.info(("successfully saved stacked bar graph for "
-               f"{major_category_column_name} and {minor_category_column_name}"))
-
+                     f"{major_category_column_name} and {minor_category_column_name}"))
 
     def _create_stacked_figure(self, frames):
-        fig = frames.plot(kind='barh', stacked=True,edgecolor = "none")
+        fig = frames.plot(kind='barh', stacked=True, edgecolor="none")
         plt.legend(title=frames.columns.name)
         plt.gcf().subplots_adjust(bottom=0.30)
         return fig
