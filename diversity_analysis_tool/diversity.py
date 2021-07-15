@@ -5,7 +5,10 @@ import pandas as pd
 import numpy as np
 
 from diversity_analysis_tool.graph_construction import GraphUtility
-from diversity_analysis_tool.nhs_codes import NHS_ETHNICITY_CODE_DICT, NHS_RACE_CODE_DICT
+from diversity_analysis_tool.nhs_codes import (
+    NHS_ETHNICITY_CODE_DICT,
+    NHS_RACE_CODE_DICT,
+)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -21,8 +24,13 @@ class AssessDiversity:
     age, sex, ethnicity, race, ses, is_deceased.
     """
 
-    def __init__(self, preferred_ethnicity_transformation, preferred_race_transformation,
-                 preferred_sex_transformation, preferred_ses_transformation):
+    def __init__(
+        self,
+        preferred_ethnicity_transformation,
+        preferred_race_transformation,
+        preferred_sex_transformation,
+        preferred_ses_transformation,
+    ):
 
         # By default, this class assumes it is processing data coming from an NHS hospital.  It could be adapted
         # to support data sets from other countries (eg: USA) by developing other methods that recognised different
@@ -37,8 +45,17 @@ class AssessDiversity:
         self.age_lower_limit = 0
         self.age_upper_limit = 90
 
-    def transform(self, original_df, years_per_age_band, age_column_name, sex_column_name, ethnicity_column_name,
-                  race_column_name, ses_column_name, is_deceased_column_name):
+    def transform(
+        self,
+        original_df,
+        years_per_age_band,
+        age_column_name,
+        sex_column_name,
+        ethnicity_column_name,
+        race_column_name,
+        ses_column_name,
+        is_deceased_column_name,
+    ):
         """
         Transform demographic dataframe
 
@@ -53,7 +70,13 @@ class AssessDiversity:
             is_deceased_column_name: column name in the input demographic data frame that describes is deceased. (eg: 'is_deceased')
         """
         df = original_df.copy()
-        df = create_age_bands(df, age_column_name, self.age_lower_limit, self.age_upper_limit, years_per_age_band)
+        df = create_age_bands(
+            df,
+            age_column_name,
+            self.age_lower_limit,
+            self.age_upper_limit,
+            years_per_age_band,
+        )
         if self.transform_sex_routine:
             df = self.transform_sex_routine(df, sex_column_name)
         if self.transform_ethnicity_routine:
@@ -67,21 +90,32 @@ class AssessDiversity:
         # keeping ses_column_name as socio-economic status can be measured in different ways
 
         colname_dict = {
-            'age_band': age_column_name,
-            'sex': sex_column_name,
-            'ethnicity': ethnicity_column_name,
-            'race': race_column_name,
-            'is_deceased': is_deceased_column_name,
-            ses_column_name: ses_column_name
+            "age_band": age_column_name,
+            "sex": sex_column_name,
+            "ethnicity": ethnicity_column_name,
+            "race": race_column_name,
+            "is_deceased": is_deceased_column_name,
+            ses_column_name: ses_column_name,
         }
-        all_columns_list = [k for k, v in colname_dict.items() if v in df.columns.values]
+        all_columns_list = [
+            k for k, v in colname_dict.items() if v in df.columns.values
+        ]
         df = df[all_columns_list]
         df = df.sort_values(by=all_columns_list[0])
         return df
 
-    def create_diversity_analysis_report(self, original_df, years_per_band, age_column_name, sex_column_name,
-                                         ethnicity_column_name, race_column_name, ses_column_name,
-                                         is_deceased_column_name, output_directory_path):
+    def create_diversity_analysis_report(
+        self,
+        original_df,
+        years_per_band,
+        age_column_name,
+        sex_column_name,
+        ethnicity_column_name,
+        race_column_name,
+        ses_column_name,
+        is_deceased_column_name,
+        output_directory_path,
+    ):
         """
         The main routine to call from your own analysis for diversity.
         Args:
@@ -96,28 +130,37 @@ class AssessDiversity:
             output_directory_path: directory where all the CSV and results will be stored.
         """
         df = original_df.copy()
-        cleaned_results_df = self.transform(df, years_per_band, age_column_name, sex_column_name,
-                                            ethnicity_column_name, race_column_name, ses_column_name,
-                                            is_deceased_column_name)
+        cleaned_results_df = self.transform(
+            df,
+            years_per_band,
+            age_column_name,
+            sex_column_name,
+            ethnicity_column_name,
+            race_column_name,
+            ses_column_name,
+            is_deceased_column_name,
+        )
 
         if not os.path.exists(output_directory_path):
             os.makedirs(output_directory_path)
 
         # Write results out to a file
-        csv_output_file_path = os.path.join(output_directory_path, 'diversity_analysis_report.csv')
+        csv_output_file_path = os.path.join(
+            output_directory_path, "diversity_analysis_report.csv"
+        )
         cleaned_results_df.to_csv(
-            csv_output_file_path,
-            sep="|",
-            encoding="utf-8",
-            index=False,
+            csv_output_file_path, sep="|", encoding="utf-8", index=False,
         )
 
         # Write out graphs. Change the boolean field from True False to make it easier to read in visual
         # presentations
-        if 'is_deceased' in cleaned_results_df:
-            cleaned_results_df['is_deceased'] = cleaned_results_df['is_deceased'].astype(str)
-            cleaned_results_df['is_deceased'] = cleaned_results_df['is_deceased'].replace(
-                {'True': 'Yes', 'False': 'No'}, regex=False)
+        if "is_deceased" in cleaned_results_df:
+            cleaned_results_df["is_deceased"] = cleaned_results_df[
+                "is_deceased"
+            ].astype(str)
+            cleaned_results_df["is_deceased"] = cleaned_results_df[
+                "is_deceased"
+            ].replace({"True": "Yes", "False": "No"}, regex=False)
 
         grapher = GraphUtility(cleaned_results_df, output_directory_path)
         grapher.build_graph()
@@ -126,7 +169,9 @@ class AssessDiversity:
 # ==========================
 # Age Transformation Methods
 # ==========================
-def create_age_bands(original_df, age_field_name, start_age=0, end_age=90, years_per_band=5):
+def create_age_bands(
+    original_df, age_field_name, start_age=0, end_age=90, years_per_band=5
+):
     """
     Creates a new column which has an age band corresponding to the 'age' field in the input data. Age bands
     are created using a years_per_band, which is usually five. The age bands will look something like this:
@@ -148,9 +193,14 @@ def create_age_bands(original_df, age_field_name, start_age=0, end_age=90, years
 
     bin_buckets = [item for item in range(start_age, end_age + 1, years_per_band)]
     bin_buckets.append(999)
-    lbs = ['(%d, %d]' % (bin_buckets[i], bin_buckets[i + 1]) for i in range(len(bin_buckets) - 1)]
+    lbs = [
+        "(%d, %d]" % (bin_buckets[i], bin_buckets[i + 1])
+        for i in range(len(bin_buckets) - 1)
+    ]
 
-    df[banded_field_name] = pd.cut(x=df[age_field_name], bins=bin_buckets, labels=lbs, include_lowest=True).astype(str)
+    df[banded_field_name] = pd.cut(
+        x=df[age_field_name], bins=bin_buckets, labels=lbs, include_lowest=True
+    ).astype(str)
     df[banded_field_name] = df[banded_field_name].str.strip()
 
     current_last_band_name = f"({end_age}, 999]"
@@ -161,8 +211,23 @@ def create_age_bands(original_df, age_field_name, start_age=0, end_age=90, years
     )
 
     df[banded_field_name] = df[banded_field_name].astype(str)
-    df[banded_field_name] = df[banded_field_name].apply(lambda x: str(x[x.find("(") + 1:x.find("]")]))
-    df[banded_field_name] = df[banded_field_name].apply(lambda x: x.replace(',', ' -'))
+    df[banded_field_name] = df[banded_field_name].apply(
+        lambda x: str(x[x.find("(") + 1 : x.find("]")])
+    )
+    df[banded_field_name] = df[banded_field_name].apply(lambda x: x.replace(",", " -"))
+
+    # the bands need to be ordered by first age in range for visualisation later
+    order = df[banded_field_name].sort_values().unique()
+    order = [x for x in order if x != "na"]
+    sorted_idx = np.argsort([int(x[:2]) for x in order])
+    new_order = [order[i] for i in sorted_idx]
+    # fix order for the column
+    df[banded_field_name] = pd.Categorical(
+        df[banded_field_name], categories=new_order, ordered=True
+    )
+
+    # remove the string 'na' and replace with numpy nan so that missing rates can be computed later
+    df[banded_field_name] = df[banded_field_name].replace("na", np.nan)
 
     return df
 
@@ -187,15 +252,15 @@ def transform_nhs_sex(original_df, sex_column_name):
 
     df = original_df.copy()
 
-    df[sex_column_name] = df[sex_column_name].astype('Int64')
+    df[sex_column_name] = df[sex_column_name].astype("Int64")
     df[sex_column_name] = df[sex_column_name].astype(str)
     replace_dict = {
         pd.NA: -999,
-        '1': 'Male',
-        '2': 'Female',
-        '8': 'Not specified',
-        '9': 'Home Leave',
-        '-999': 'Unknown',
+        "1": "Male",
+        "2": "Female",
+        "8": "Not specified",
+        "9": "Home Leave",
+        "-999": "Unknown",
     }
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)
     return df
@@ -217,13 +282,13 @@ def transform_desktop_application_database_sex(original_df, sex_column_name):
         return original_df
 
     df = original_df.copy()
-    df[sex_column_name] = df[sex_column_name].astype('Int64')
-    df[sex_column_name] = df[sex_column_name].replace(np.nan, 'Unknown', regex=True)
+    df[sex_column_name] = df[sex_column_name].astype("Int64")
+    df[sex_column_name] = df[sex_column_name].replace(np.nan, "Unknown", regex=True)
     df[sex_column_name] = df[sex_column_name].astype(str)
     replace_dict = {
-        '0': 'Male',
-        '1': 'Female',
-        '2': 'Unknown',
+        "0": "Male",
+        "1": "Female",
+        "2": "Unknown",
     }
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)
     return df
@@ -232,6 +297,7 @@ def transform_desktop_application_database_sex(original_df, sex_column_name):
 # ================================
 # Ethnicity Transformation Methods
 # ================================
+
 
 def transform_nhs_ethnicity(df, ethnicity_column_name):
     """
@@ -242,15 +308,18 @@ def transform_nhs_ethnicity(df, ethnicity_column_name):
     Returns: Dataframe with updated ethnicity column
 
     """
-    df1 = df[ethnicity_column_name].replace(np.nan, '', regex=True)
-    df1[ethnicity_column_name].fillna('Unknown', inplace=True)
-    df1[ethnicity_column_name] = df1[ethnicity_column_name].apply(lambda x: NHS_ETHNICITY_CODE_DICT[x])
+    df1 = df[ethnicity_column_name].replace(np.nan, "", regex=True)
+    df1[ethnicity_column_name].fillna("Unknown", inplace=True)
+    df1[ethnicity_column_name] = df1[ethnicity_column_name].apply(
+        lambda x: NHS_ETHNICITY_CODE_DICT[x]
+    )
     return df1
 
 
 # ===========================
 # Race Transformation Methods
 # ===========================
+
 
 def transform_nhs_race(df, race_column_name):
     """
@@ -264,7 +333,7 @@ def transform_nhs_race(df, race_column_name):
         print("There is no race column")
         return df
 
-    df[race_column_name].fillna('Unknown', inplace=True)
+    df[race_column_name].fillna("Unknown", inplace=True)
     df[race_column_name] = df[race_column_name].apply(lambda x: NHS_RACE_CODE_DICT[x])
     return df
 
@@ -277,13 +346,13 @@ def transform_ses_order(df, ses_column_name):
         ses_column_name: the column name in the demographic data that describes socio-economic status
     Returns: Dataframe sorted by ses level.
     """
-    if 'ses_level' not in df.columns.values:
+    if "ses_level" not in df.columns.values:
         return df
 
     # ordering the levels by ses_level:
     level_order = sorted(set(zip(df.ses_level, df[ses_column_name])))
     level_order = [lev[1] for lev in level_order]
-    df[ses_column_name] = df[ses_column_name].astype('category')
+    df[ses_column_name] = df[ses_column_name].astype("category")
     df[ses_column_name].cat.reorder_categories(level_order, inplace=True)
 
     return df
