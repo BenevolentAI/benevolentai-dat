@@ -13,9 +13,17 @@ def main():
     Command line entry point for assessing diversity in data
     """
     parser = argparse.ArgumentParser(description="assess the diversity of your data")
-    parser.add_argument("input_data", type=str, help="Path to the csv file containing the data you want to assess.")
-    parser.add_argument("output_dir", type=str, help="Path to a directory where results will stored.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Increase logging verbosity.")
+    parser.add_argument(
+        "input_data",
+        type=str,
+        help="Path to the csv file containing the data you want to assess.",
+    )
+    parser.add_argument(
+        "output_dir", type=str, help="Path to a directory where results will stored."
+    )
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Increase logging verbosity."
+    )
     args = parser.parse_args()
     if args.verbose:
         logger.setLevel(logging.DEBUG)
@@ -25,13 +33,23 @@ def main():
     if not os.path.isdir(args.output_dir):
         logger.error(f"{args.output_dir} does not exist, creating directory")
 
-
     data_df = pd.read_csv(args.input_data)
 
-    logger.debug("Converted data to pandas data frame. Creating AssessDiversity instance")
+    logger.debug(
+        "Converted data to pandas data frame. Creating AssessDiversity instance"
+    )
     # if there is a column describing the ses levels in the data frame, order the levels accordingly
     assess_diversity = AssessDiversity(None, None, None, transform_ses_order)
 
-    assess_diversity.create_diversity_analysis_report(data_df, 5, 'age', 'sex', 'ethnicity',
-                                                      'race', 'educ', 'is_deceased', args.output_dir)
+    assess_diversity.create_diversity_analysis_report(
+        data_df,
+        5,
+        "age",
+        "sex",
+        "ethnicity",
+        "race",
+        "educ",
+        "is_deceased",
+        args.output_dir,
+    )
     logger.info("Assessment complete. See {} for results".format(args.output_dir))
