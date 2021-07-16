@@ -87,11 +87,11 @@ class GraphUtility:
             )
 
         self.plot_missing_rates(
-            colname_dict, x_label="% of entries missing", show_percentage=True
+            colname_dict, x_label="% of entries missing", show_fraction=True
         )
 
     def plot_missing_rates(
-        self, colname_dict, x_label=None, y_label=None, show_percentage=True
+        self, colname_dict, x_label=None, y_label=None, show_fraction=True
     ):
         """
         generates a bar graph displaying the number or percentage of missing entries for each column in colname_dict.keys()
@@ -99,14 +99,14 @@ class GraphUtility:
             colname_dict: dictionary with column names to plot as keys and the label for visualisation as item
             x_label (optional): label for x axis. If none no x-axis label is shown.
             y_label (optional): label for y axis. If none the major_category_column_name is used as label
-            show_percentage (optional): whether percentage or raw count should be shown, defaults to True.
+            show_fraction (optional): whether percentage or raw count should be shown, defaults to True.
         """
 
         missing_rates = pd.DataFrame(
             self.df[colname_dict.keys()].isna().sum(axis=0)
         ).rename(colname_dict)
 
-        if show_percentage:
+        if show_fraction:
             missing_rates = missing_rates / self.df.shape[0]
             plt.xlim(0, 1)
 
