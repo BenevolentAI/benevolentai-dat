@@ -18,7 +18,6 @@ class GraphUtility:
         self.df = df
         self.output_directory_path = output_directory_path
 
-
     def build_graph(self):
         """this function collects columns with predifined column names and maps
         through a dictionary of graphing functions"""
@@ -188,7 +187,9 @@ class GraphUtility:
         stacked_bar_graph_df = self.df[
             [major_category_column_name, minor_category_column_name]
         ]
-        stacked_bar_graph_df = stacked_bar_graph_df.fillna({minor_category_column_name: 'not provided'})
+        stacked_bar_graph_df = stacked_bar_graph_df.fillna(
+            {minor_category_column_name: "not provided"}
+        )
 
         results_df = pd.crosstab(
             stacked_bar_graph_df[major_category_column_name],

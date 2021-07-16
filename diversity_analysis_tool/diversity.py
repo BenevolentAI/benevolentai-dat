@@ -217,7 +217,7 @@ def create_age_bands(
     df[banded_field_name] = df[banded_field_name].apply(lambda x: x.replace(",", " -"))
 
     # the bands need to be ordered by first age in range for visualisation later
-    order = df[df[banded_field_name] != 'na'][banded_field_name].unique()
+    order = df[df[banded_field_name] != "na"][banded_field_name].unique()
     sorted_idx = np.argsort([int(x[:2]) for x in order])
     new_order = order[sorted_idx]
     # fix order for the column
