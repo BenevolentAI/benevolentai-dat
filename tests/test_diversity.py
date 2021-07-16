@@ -4,6 +4,7 @@ from diversity_analysis_tool.diversity import create_age_bands
 from diversity_analysis_tool.diversity import transform_nhs_sex
 from diversity_analysis_tool.diversity import transform_nhs_ethnicity
 from diversity_analysis_tool.diversity import transform_nhs_race
+from diversity_analysis_tool.diversity import transform_ses_order
 
 import pandas as pd
 
@@ -15,15 +16,15 @@ def test_transform():
                               'is_deceased': False},
                              {'person_id': 3, 'sex': 8, 'ethnicity': 'R', 'age': 42,
                               'is_deceased': True}])
-    diversity_analyser = AssessDiversity(transform_nhs_ethnicity, transform_nhs_race, transform_nhs_sex)
+    diversity_analyser = AssessDiversity(transform_nhs_ethnicity, transform_nhs_race, transform_nhs_sex, transform_ses_order)
     actual_results_df =  diversity_analyser.transform(test_df, 5, 'age', 'sex', 'ethnicity', None, None,
                                                       'is_deceased')
 
-    expected_results_df =  pd.DataFrame([{'age_band': '(30, 35]', 'sex': 'Male', 'ethnicity': 'British',
+    expected_results_df =  pd.DataFrame([{'age_band': '30 - 35', 'sex': 'Male', 'ethnicity': 'British',
                                           'is_deceased': True},
-                                         {'age_band': '(35, 40]', 'sex': 'Female', 'ethnicity': 'Caribbean',
+                                         {'age_band': '35 - 40', 'sex': 'Female', 'ethnicity': 'Caribbean',
                                           'is_deceased': False},
-                                         {'age_band': '(40, 45]', 'sex': 'Not specified', 'ethnicity': 'Chinese',
+                                         {'age_band': '40 - 45', 'sex': 'Not specified', 'ethnicity': 'Chinese',
                                           'is_deceased': True}])
     check_data_sets_equal(actual_results_df, expected_results_df)
 
@@ -34,16 +35,16 @@ def test_transform_age_bands():
                              {'person_id': 2, 'age': 21},
                              {'person_id': 3, 'age': 90}])
     actual_results_df = create_age_bands(test_df, 'age', 0, 90, 5)
-    expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '(0, 5]'},
-                                         {'person_id': 2, 'age': 21, 'age_band': '(20, 25]'},
-                                         {'person_id': 3, 'age': 90, 'age_band': '(85, 90]'}])
+    expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '0 - 5'},
+                                         {'person_id': 2, 'age': 21, 'age_band': '20 - 25'},
+                                         {'person_id': 3, 'age': 90, 'age_band': '85 - 90'}])
     check_data_sets_equal(actual_results_df, expected_results_df)
 
     # Works with an even age banding
     actual_results_df = create_age_bands(test_df, 'age', 0, 90, 2)
-    expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '(4, 6]'},
-                                         {'person_id': 2, 'age': 21, 'age_band': '(20, 22]'},
-                                         {'person_id': 3, 'age': 90, 'age_band': '(88, 90]'}])
+    expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '4 - 6'},
+                                         {'person_id': 2, 'age': 21, 'age_band': '20 - 22'},
+                                         {'person_id': 3, 'age': 90, 'age_band': '88 - 90'}])
     check_data_sets_equal(actual_results_df, expected_results_df)
 
     # Works with a value that is greater than the age limits used to produce bands
@@ -51,9 +52,9 @@ def test_transform_age_bands():
                              {'person_id': 2, 'age': 21},
                              {'person_id': 3, 'age': 105}])
     actual_results_df = create_age_bands(test_df, 'age', 0, 90, 2)
-    expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '(4, 6]'},
-                                         {'person_id': 2, 'age': 21, 'age_band': '(20, 22]'},
-                                         {'person_id': 3, 'age': 105, 'age_band': '(90plus]'}])
+    expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '4 - 6'},
+                                         {'person_id': 2, 'age': 21, 'age_band': '20 - 22'},
+                                         {'person_id': 3, 'age': 105, 'age_band': '90plus'}])
     check_data_sets_equal(actual_results_df, expected_results_df)
 
 

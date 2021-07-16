@@ -43,3 +43,4 @@ NHS_RACE_CODE_DICT = dict(
     Z='Not stated',
     Unknown='Unknown',
 )
+
