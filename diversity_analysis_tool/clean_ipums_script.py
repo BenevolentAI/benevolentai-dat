@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 # Converted raw IPUMS data set in .csv to cleaned dataframe
 # Cleaned dataframe is an example input to diversity_analysis_tool
 def rename_by_code(df):
