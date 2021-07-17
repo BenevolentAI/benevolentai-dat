@@ -216,6 +216,18 @@ def create_age_bands(
     )
     df[banded_field_name] = df[banded_field_name].apply(lambda x: x.replace(",", " -"))
 
+    # the bands need to be ordered by first age in range for visualisation later
+    order = df[df[banded_field_name] != "na"][banded_field_name].unique()
+    sorted_idx = np.argsort([int(x[:2]) for x in order])
+    new_order = order[sorted_idx]
+    # fix order for the column
+    df[banded_field_name] = pd.Categorical(
+        df[banded_field_name], categories=new_order, ordered=True
+    )
+
+    # remove the string 'na' and replace with numpy nan so that missing rates can be computed later
+    df[banded_field_name] = df[banded_field_name].replace("na", np.nan)
+
     return df
 
 
@@ -240,14 +252,14 @@ def transform_nhs_sex(original_df, sex_column_name):
     df = original_df.copy()
 
     df[sex_column_name] = df[sex_column_name].astype("Int64")
-    df[sex_column_name] = df[sex_column_name].replace(np.nan, -1, regex=True)
     df[sex_column_name] = df[sex_column_name].astype(str)
     replace_dict = {
+        pd.NA: -999,
         "1": "Male",
         "2": "Female",
         "8": "Not specified",
         "9": "Home Leave",
-        "-1": "Unknown",
+        "-999": "Unknown",
     }
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)
     return df
@@ -270,13 +282,12 @@ def transform_desktop_application_database_sex(original_df, sex_column_name):
 
     df = original_df.copy()
     df[sex_column_name] = df[sex_column_name].astype("Int64")
-    df[sex_column_name] = df[sex_column_name].replace(np.nan, -1, regex=True)
+    df[sex_column_name] = df[sex_column_name].replace(np.nan, "Unknown", regex=True)
     df[sex_column_name] = df[sex_column_name].astype(str)
     replace_dict = {
-        "-1": "Unknown",
-        "1": "Male",
-        "2": "Female",
-        "8": "Not specified",
+        "0": "Male",
+        "1": "Female",
+        "2": "Unknown",
     }
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)
     return df
@@ -296,10 +307,7 @@ def transform_nhs_ethnicity(df, ethnicity_column_name):
     Returns: Dataframe with updated ethnicity column
 
     """
-    df1 = df.copy()
-    df1[ethnicity_column_name] = df[ethnicity_column_name].replace(
-        "", np.nan, regex=True
-    )
+    df1 = df[ethnicity_column_name].replace(np.nan, "", regex=True)
     df1[ethnicity_column_name].fillna("Unknown", inplace=True)
     df1[ethnicity_column_name] = df1[ethnicity_column_name].apply(
         lambda x: NHS_ETHNICITY_CODE_DICT[x]
