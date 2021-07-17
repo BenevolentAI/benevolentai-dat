@@ -252,14 +252,13 @@ def transform_nhs_sex(original_df, sex_column_name):
     df = original_df.copy()
 
     df[sex_column_name] = df[sex_column_name].astype("Int64")
+    df[sex_column_name] = df[sex_column_name].replace(np.nan, -1, regex=True)
     df[sex_column_name] = df[sex_column_name].astype(str)
     replace_dict = {
-        pd.NA: -999,
         "1": "Male",
         "2": "Female",
         "8": "Not specified",
-        "9": "Home Leave",
-        "-999": "Unknown",
+        "-1": "Unknown",
     }
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)
     return df
@@ -282,12 +281,13 @@ def transform_desktop_application_database_sex(original_df, sex_column_name):
 
     df = original_df.copy()
     df[sex_column_name] = df[sex_column_name].astype("Int64")
-    df[sex_column_name] = df[sex_column_name].replace(np.nan, "Unknown", regex=True)
+    df[sex_column_name] = df[sex_column_name].replace(np.nan, -1, regex=True)
     df[sex_column_name] = df[sex_column_name].astype(str)
     replace_dict = {
-        "0": "Male",
-        "1": "Female",
-        "2": "Unknown",
+        "-1": "Unknown",
+        "1": "Male",
+        "2": "Female",
+        "8": "Not specified",
     }
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)
     return df
@@ -307,7 +307,10 @@ def transform_nhs_ethnicity(df, ethnicity_column_name):
     Returns: Dataframe with updated ethnicity column
 
     """
-    df1 = df[ethnicity_column_name].replace(np.nan, "", regex=True)
+    df1 = df.copy()
+    df1[ethnicity_column_name] = df[ethnicity_column_name].replace(
+        "", np.nan, regex=True
+    )
     df1[ethnicity_column_name].fillna("Unknown", inplace=True)
     df1[ethnicity_column_name] = df1[ethnicity_column_name].apply(
         lambda x: NHS_ETHNICITY_CODE_DICT[x]
