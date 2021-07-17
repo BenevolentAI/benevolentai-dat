@@ -258,7 +258,6 @@ def transform_nhs_sex(original_df, sex_column_name):
         "1": "Male",
         "2": "Female",
         "8": "Not specified",
-        "9": "Home Leave",
         "-1": "Unknown",
     }
     df[sex_column_name] = df[sex_column_name].replace(replace_dict, regex=False)

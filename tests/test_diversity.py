@@ -1,4 +1,3 @@
-
 from diversity_analysis_tool.diversity import AssessDiversity
 from diversity_analysis_tool.diversity import create_age_bands
 from diversity_analysis_tool.diversity import transform_nhs_sex
@@ -26,6 +25,7 @@ def test_transform():
                                           'is_deceased': False},
                                          {'age_band': '40 - 45', 'sex': 'Not specified', 'ethnicity': 'Chinese',
                                           'is_deceased': True}])
+    expected_results_df['age_band']=pd.Categorical(expected_results_df['age_band'], categories=['30 - 35','35 - 40','40 - 45'], ordered=True)
     check_data_sets_equal(actual_results_df, expected_results_df)
 
 
@@ -38,6 +38,8 @@ def test_transform_age_bands():
     expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '0 - 5'},
                                          {'person_id': 2, 'age': 21, 'age_band': '20 - 25'},
                                          {'person_id': 3, 'age': 90, 'age_band': '85 - 90'}])
+    expected_results_df['age_band']=pd.Categorical(expected_results_df['age_band'], categories=['0 - 5','20 - 25','85 - 90'], ordered=True)
+
     check_data_sets_equal(actual_results_df, expected_results_df)
 
     # Works with an even age banding
@@ -45,6 +47,8 @@ def test_transform_age_bands():
     expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '4 - 6'},
                                          {'person_id': 2, 'age': 21, 'age_band': '20 - 22'},
                                          {'person_id': 3, 'age': 90, 'age_band': '88 - 90'}])
+    expected_results_df['age_band']=pd.Categorical(expected_results_df['age_band'], categories=['4 - 6','20 - 22','88 - 90'], ordered=True)
+
     check_data_sets_equal(actual_results_df, expected_results_df)
 
     # Works with a value that is greater than the age limits used to produce bands
@@ -55,6 +59,8 @@ def test_transform_age_bands():
     expected_results_df =  pd.DataFrame([{'person_id': 1, 'age': 5, 'age_band': '4 - 6'},
                                          {'person_id': 2, 'age': 21, 'age_band': '20 - 22'},
                                          {'person_id': 3, 'age': 105, 'age_band': '90plus'}])
+    expected_results_df['age_band']=pd.Categorical(expected_results_df['age_band'], categories=['4 - 6','20 - 22','90plus'], ordered=True)
+
     check_data_sets_equal(actual_results_df, expected_results_df)
 
 
